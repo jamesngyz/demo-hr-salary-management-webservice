@@ -15,6 +15,12 @@ import com.opencsv.bean.CsvToBeanBuilder;
 @Service
 public class UserService {
 	
+	private UserRepository userRepository;
+	
+	public UserService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
+	
 	/**
 	 *
 	 * @param users
@@ -23,7 +29,7 @@ public class UserService {
 	 *         values
 	 */
 	Integer createOrUpdateUsers(List<User> users) {
-		return null;
+		return userRepository.createOrUpdate(users);
 	}
 	
 	List<User> csvToUsers(MultipartFile file) throws IOException {
@@ -32,8 +38,7 @@ public class UserService {
 				.withType(User.class)
 				.withIgnoreLeadingWhiteSpace(true)
 				.build();
-		List<User> users = csvToBean.parse();
-		return users;
+		return csvToBean.parse();
 	}
 	
 }
