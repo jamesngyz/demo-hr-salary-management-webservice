@@ -1,7 +1,10 @@
 spring.datasource:
-  url: jdbc:h2:mem:myDb;DB_CLOSE_DELAY=-1;mode=MySQL
+  url: jdbc:h2:mem:salarydb;DB_CLOSE_DELAY=-1;mode=MySQL
   driver-class-name: org.h2.Driver
+  username: sa
+  password: password
+spring.h2.console.enabled: true
 
 hibernate:
-  dialect: org.hibernate.dialect.MySQL5Dialect
+  dialect: org.hibernate.dialect.MySQL8Dialect
   hbm2ddl.auto: create-drop
