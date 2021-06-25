@@ -10,4 +10,8 @@ public class InvalidCsvException extends RuntimeException {
 		return new InvalidCsvException("CSV contains missing field.");
 	}
 	
+	public static InvalidCsvException invalidFieldValue() {
+		return new InvalidCsvException("CSV contains field with invalid value.");
+	}
+	
 }

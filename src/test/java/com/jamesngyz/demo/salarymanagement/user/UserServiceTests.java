@@ -168,4 +168,18 @@ public class UserServiceTests {
 				.hasMessage(InvalidCsvException.missingField().getMessage());
 	}
 	
+	@Test
+	void csvToUsers_CsvHasNegativeSalary_ThrowInvalidCsvException() throws IOException, ParseException {
+		MockMultipartFile file = new MockMultipartFile(
+				"file", "test.txt", "text/plain",
+				("id,login,name,salary,startDate\n" +
+						"e0001,hpotter,Harry Potter,1234.00,16-Nov-01\n" +
+						"e0002,rwesley,Ron Weasley,-19234.50,2001-11-16").getBytes());
+		
+		assertThatThrownBy(() -> {
+			subject.csvToUsers(file);
+		}).isInstanceOf(InvalidCsvException.class)
+				.hasMessage(InvalidCsvException.invalidFieldValue().getMessage());
+	}
+	
 }

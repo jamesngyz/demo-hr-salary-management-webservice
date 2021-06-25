@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.jamesngyz.demo.salarymanagement.CsvDateConverter;
+import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvCustomBindByName;
 
@@ -34,6 +35,13 @@ public class User {
 	@EqualsAndHashCode.Include
 	private BigDecimal salaryEquals() {
 		return salary == null ? null : salary.stripTrailingZeros();
+	}
+	
+	public void setSalary(BigDecimal salary) {
+		if (salary.compareTo(BigDecimal.ZERO) < 0) {
+			throw InvalidCsvException.invalidFieldValue();
+		}
+		this.salary = salary;
 	}
 	
 }
