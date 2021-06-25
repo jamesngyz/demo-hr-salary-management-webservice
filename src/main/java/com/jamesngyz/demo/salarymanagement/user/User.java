@@ -1,11 +1,11 @@
 package com.jamesngyz.demo.salarymanagement.user;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
-import com.jamesngyz.demo.salarymanagement.Constants;
+import com.jamesngyz.demo.salarymanagement.CsvDateConverter;
 import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvDate;
+import com.opencsv.bean.CsvCustomBindByName;
 
 import lombok.*;
 
@@ -28,9 +28,8 @@ public class User {
 	@EqualsAndHashCode.Exclude
 	private BigDecimal salary;
 	
-	@CsvBindByName(column = "startDate")
-	@CsvDate(Constants.DATE_FORMAT)
-	private Date startDate;
+	@CsvCustomBindByName(column = "startDate", converter = CsvDateConverter.class)
+	private LocalDate startDate;
 	
 	@EqualsAndHashCode.Include
 	private BigDecimal salaryEquals() {

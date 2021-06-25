@@ -1,7 +1,7 @@
 package com.jamesngyz.demo.salarymanagement.user.rest;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,7 +27,7 @@ public class UserResponse {
 	private BigDecimal salary;
 	
 	@JsonProperty("startDate")
-	@JsonFormat(pattern = Constants.DATE_FORMAT)
-	private Date startDate;
+	@JsonFormat(pattern = Constants.DATE_FORMAT_DD_MMM_YY)
+	private LocalDate startDate;
 	
 }

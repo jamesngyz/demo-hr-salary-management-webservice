@@ -1,14 +1,12 @@
 package com.jamesngyz.demo.salarymanagement.user;
 
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.StringJoiner;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-
-import com.jamesngyz.demo.salarymanagement.Constants;
 
 @Repository
 public class UserRepository {
@@ -43,7 +41,7 @@ public class UserRepository {
 					.addValue(loginParam, u.getLogin())
 					.addValue(nameParam, u.getName())
 					.addValue(salaryParam, u.getSalary().toString())
-					.addValue(startDateParam, new SimpleDateFormat(Constants.DATE_FORMAT_SQL).format(u.getStartDate()));
+					.addValue(startDateParam, u.getStartDate().format(DateTimeFormatter.ISO_DATE));
 		}
 		query = query + rowsJoiner.toString() +
 				" \nON DUPLICATE KEY UPDATE " +

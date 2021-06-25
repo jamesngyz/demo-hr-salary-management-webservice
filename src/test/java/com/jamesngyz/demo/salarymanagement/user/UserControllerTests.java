@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -49,7 +50,7 @@ public class UserControllerTests {
 				"text/plain",
 				"id,login,name,salary,startDate\ne0001,hpotter,Harry Potter,1234.00,16-Nov-01".getBytes());
 		
-		SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT, Locale.ENGLISH);
+		SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT_DD_MMM_YY, Locale.ENGLISH);
 		Date startDate = formatter.parse("16-Nov-01");
 		
 		List<User> users = new ArrayList<>();
@@ -58,7 +59,7 @@ public class UserControllerTests {
 				.login("hpotter")
 				.name("Harry Potter")
 				.salary(BigDecimal.valueOf(1234.00))
-				.startDate(startDate)
+				.startDate(startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
 				.build();
 		users.add(user);
 		when(service.csvToUsers(file)).thenReturn(users);
@@ -82,7 +83,7 @@ public class UserControllerTests {
 				"text/plain",
 				"id,login,name,salary,startDate\ne0001,hpotter,Harry Potter,1234.00,16-Nov-01".getBytes());
 		
-		SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT, Locale.ENGLISH);
+		SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT_DD_MMM_YY, Locale.ENGLISH);
 		Date startDate = formatter.parse("16-Nov-01");
 		
 		List<User> users = new ArrayList<>();
@@ -91,7 +92,7 @@ public class UserControllerTests {
 				.login("hpotter")
 				.name("Harry Potter")
 				.salary(BigDecimal.valueOf(1234.00))
-				.startDate(startDate)
+				.startDate(startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
 				.build();
 		users.add(user);
 		when(service.csvToUsers(file)).thenReturn(users);

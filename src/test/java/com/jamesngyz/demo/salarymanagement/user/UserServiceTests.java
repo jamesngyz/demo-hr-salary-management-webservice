@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,14 +36,14 @@ public class UserServiceTests {
 	@Test
 	void createOrUpdateUsers_Created_ReturnCount() throws ParseException {
 		List<User> requested = new ArrayList<>();
-		SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT, Locale.ENGLISH);
+		SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT_DD_MMM_YY, Locale.ENGLISH);
 		Date startDate = formatter.parse("16-Nov-01");
 		User user = User.builder()
 				.id("e0001")
 				.login("hpotter")
 				.name("Harry Potter")
 				.salary(BigDecimal.valueOf(1234.00))
-				.startDate(startDate)
+				.startDate(startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
 				.build();
 		requested.add(user);
 		when(repository.createOrUpdate(requested)).thenReturn(1);
@@ -56,22 +59,30 @@ public class UserServiceTests {
 				"file",
 				"test.txt",
 				"text/plain",
-				"id,login,name,salary,startDate\ne0001,hpotter,Harry Potter,1234.00,16-Nov-01".getBytes());
+				("id,login,name,salary,startDate\n" +
+						"e0001,hpotter,Harry Potter,1234.00,16-Nov-01\n" +
+						"e0002,rwesley,Ron Weasley,19234.50,2001-11-16").getBytes());
 		
-		SimpleDateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT, Locale.ENGLISH);
-		Date startDate = formatter.parse("16-Nov-01");
-		User user = User.builder()
+		User user1 = User.builder()
 				.id("e0001")
 				.login("hpotter")
 				.name("Harry Potter")
 				.salary(BigDecimal.valueOf(1234.00))
-				.startDate(startDate)
+				.startDate(LocalDate.parse("16-Nov-01", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DD_MMM_YY)))
+				.build();
+		User user2 = User.builder()
+				.id("e0002")
+				.login("rwesley")
+				.name("Ron Weasley")
+				.salary(BigDecimal.valueOf(19234.50))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_YYYY_MM_DD)))
 				.build();
 		
 		List<User> result = subject.csvToUsers(file);
 		
 		assertThat(result).isNotNull();
-		assertThat(result).hasSize(1);
-		assertThat(result).contains(user);
+		assertThat(result).hasSize(2);
+		assertThat(result).contains(user1);
+		assertThat(result).contains(user2);
 	}
 }
