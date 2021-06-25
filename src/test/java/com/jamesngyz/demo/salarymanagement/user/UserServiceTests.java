@@ -1,6 +1,7 @@
 package com.jamesngyz.demo.salarymanagement.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.jamesngyz.demo.salarymanagement.Constants;
+import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTests {
@@ -85,4 +87,85 @@ public class UserServiceTests {
 		assertThat(result).contains(user1);
 		assertThat(result).contains(user2);
 	}
+	
+	@Test
+	void csvToUsers_CsvHasMissingId_ThrowInvalidCsvException() throws IOException, ParseException {
+		MockMultipartFile file = new MockMultipartFile(
+				"file",
+				"test.txt",
+				"text/plain",
+				("id,login,name,salary,startDate\n" +
+						",hpotter,Harry Potter,1234.00,16-Nov-01\n" +
+						"e0002,rwesley,Ron Weasley,19234.50,2001-11-16").getBytes());
+		
+		assertThatThrownBy(() -> {
+			subject.csvToUsers(file);
+		}).isInstanceOf(InvalidCsvException.class)
+				.hasMessage(InvalidCsvException.missingField().getMessage());
+	}
+	
+	@Test
+	void csvToUsers_CsvHasMissingLogin_ThrowInvalidCsvException() throws IOException, ParseException {
+		MockMultipartFile file = new MockMultipartFile(
+				"file",
+				"test.txt",
+				"text/plain",
+				("id,login,name,salary,startDate\n" +
+						"e0001,,Harry Potter,1234.00,16-Nov-01\n" +
+						"e0002,rwesley,Ron Weasley,19234.50,2001-11-16").getBytes());
+		
+		assertThatThrownBy(() -> {
+			subject.csvToUsers(file);
+		}).isInstanceOf(InvalidCsvException.class)
+				.hasMessage(InvalidCsvException.missingField().getMessage());
+	}
+	
+	@Test
+	void csvToUsers_CsvHasMissingName_ThrowInvalidCsvException() throws IOException, ParseException {
+		MockMultipartFile file = new MockMultipartFile(
+				"file",
+				"test.txt",
+				"text/plain",
+				("id,login,name,salary,startDate\n" +
+						"e0001,hpotter,,1234.00,16-Nov-01\n" +
+						"e0002,rwesley,Ron Weasley,19234.50,2001-11-16").getBytes());
+		
+		assertThatThrownBy(() -> {
+			subject.csvToUsers(file);
+		}).isInstanceOf(InvalidCsvException.class)
+				.hasMessage(InvalidCsvException.missingField().getMessage());
+	}
+	
+	@Test
+	void csvToUsers_CsvHasMissingSalary_ThrowInvalidCsvException() throws IOException, ParseException {
+		MockMultipartFile file = new MockMultipartFile(
+				"file",
+				"test.txt",
+				"text/plain",
+				("id,login,name,salary,startDate\n" +
+						"e0001,hpotter,Harry Potter,,16-Nov-01\n" +
+						"e0002,rwesley,Ron Weasley,19234.50,2001-11-16").getBytes());
+		
+		assertThatThrownBy(() -> {
+			subject.csvToUsers(file);
+		}).isInstanceOf(InvalidCsvException.class)
+				.hasMessage(InvalidCsvException.missingField().getMessage());
+	}
+	
+	@Test
+	void csvToUsers_CsvHasMissingStartDate_ThrowInvalidCsvException() throws IOException, ParseException {
+		MockMultipartFile file = new MockMultipartFile(
+				"file",
+				"test.txt",
+				"text/plain",
+				("id,login,name,salary,startDate\n" +
+						"e0001,hpotter,Harry Potter,1234.00,\n" +
+						"e0002,rwesley,Ron Weasley,19234.50,2001-11-16").getBytes());
+		
+		assertThatThrownBy(() -> {
+			subject.csvToUsers(file);
+		}).isInstanceOf(InvalidCsvException.class)
+				.hasMessage(InvalidCsvException.missingField().getMessage());
+	}
+	
 }

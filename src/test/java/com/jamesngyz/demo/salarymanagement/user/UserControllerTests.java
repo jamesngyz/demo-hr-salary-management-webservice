@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jamesngyz.demo.salarymanagement.Constants;
 import com.jamesngyz.demo.salarymanagement.error.ErrorResponse;
+import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
 
 @WebMvcTest
@@ -121,4 +122,25 @@ public class UserControllerTests {
 				.andExpect(content().json(expected));
 	}
 	
+	@Test
+	void uploadUsers_CsvHasError_HttpStatus400() throws Exception {
+		MockMultipartFile file = new MockMultipartFile(
+				"file",
+				"test.txt",
+				"text/plain",
+				("id,login,name,salary,startDate\n" +
+						"e0001,hpotter,,1234.00,16-Nov-01\n" +
+						"e0002,rwesley,Ron Weasley,19234.50,2001-11-16").getBytes());
+		
+		when(service.csvToUsers(file)).thenThrow(InvalidCsvException.missingField());
+		
+		ErrorResponse response = new ErrorResponse(InvalidCsvException.missingField().getMessage());
+		String expected = objectMapper.writeValueAsString(response);
+		
+		mockMvc.perform(
+				multipart("/users/upload").file(file))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json(expected));
+	}
 }

@@ -15,20 +15,20 @@ import lombok.*;
 @Builder
 public class User {
 	
-	@CsvBindByName(column = "id")
+	@CsvBindByName(column = "id", required = true)
 	private String id;
 	
-	@CsvBindByName(column = "login")
+	@CsvBindByName(column = "login", required = true)
 	private String login;
 	
-	@CsvBindByName(column = "name")
+	@CsvBindByName(column = "name", required = true)
 	private String name;
 	
-	@CsvBindByName(column = "salary")
+	@CsvBindByName(column = "salary", required = true)
 	@EqualsAndHashCode.Exclude
 	private BigDecimal salary;
 	
-	@CsvCustomBindByName(column = "startDate", converter = CsvDateConverter.class)
+	@CsvCustomBindByName(column = "startDate", converter = CsvDateConverter.class, required = true)
 	private LocalDate startDate;
 	
 	@EqualsAndHashCode.Include
