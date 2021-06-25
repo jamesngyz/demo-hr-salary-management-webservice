@@ -4,7 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.StringJoiner;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.jamesngyz.demo.salarymanagement.Constants;
@@ -12,31 +13,43 @@ import com.jamesngyz.demo.salarymanagement.Constants;
 @Repository
 public class UserRepository {
 	
-	private JdbcTemplate jdbcTemplate;
+	private NamedParameterJdbcTemplate jdbcTemplate;
 	
-	public UserRepository(JdbcTemplate jdbcTemplate) {
+	public UserRepository(NamedParameterJdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 	
 	Integer createOrUpdate(List<User> request) {
 		String query = "INSERT INTO employee (id, login, name, salary, start_date) VALUES \n";
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		StringJoiner rowsJoiner = new StringJoiner(",\n");
-		for (User u : request) {
-			StringJoiner fieldsJoiner = new StringJoiner("','", "('", "')");
-			fieldsJoiner
-					.add(u.getId())
-					.add(u.getLogin())
-					.add(u.getName())
-					.add(u.getSalary().toString())
-					.add(new SimpleDateFormat(Constants.DATE_FORMAT_SQL).format(u.getStartDate()));
+		for (int i = 0; i < request.size(); i++) {
+			String idParam = "id" + i;
+			String loginParam = "login" + i;
+			String nameParam = "name" + i;
+			String salaryParam = "salary" + i;
+			String startDateParam = "startDate" + i;
+			
+			StringJoiner fieldsJoiner = new StringJoiner(",:", "(:", ")");
+			fieldsJoiner.add(idParam)
+					.add(loginParam)
+					.add(nameParam)
+					.add(salaryParam)
+					.add(startDateParam);
 			rowsJoiner.add(fieldsJoiner.toString());
+			
+			User u = request.get(i);
+			parameters.addValue(idParam, u.getId())
+					.addValue(loginParam, u.getLogin())
+					.addValue(nameParam, u.getName())
+					.addValue(salaryParam, u.getSalary().toString())
+					.addValue(startDateParam, new SimpleDateFormat(Constants.DATE_FORMAT_SQL).format(u.getStartDate()));
 		}
 		query = query + rowsJoiner.toString() +
-				" ON DUPLICATE KEY UPDATE " +
+				" \nON DUPLICATE KEY UPDATE " +
 				" id=VALUES(id), login=VALUES(login), name=VALUES(name), salary=VALUES(salary), start_date=VALUES(start_date);";
 		
-		// TODO: For POC purposes only. Will change this to parameter binding.
-		return jdbcTemplate.update(query);
+		return jdbcTemplate.update(query, parameters);
 	}
 	
 }
