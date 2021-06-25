@@ -1,9 +1,6 @@
 package com.jamesngyz.demo.salarymanagement.user;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -36,9 +33,12 @@ public class UserService {
 	}
 	
 	List<User> csvToUsers(MultipartFile file) throws IOException {
-		Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+		
+		InputStream stream = removeCommentedLines(file);
+		BufferedReader streamReader = new BufferedReader(new InputStreamReader(stream));
+		
 		try {
-			CsvToBean<User> csvToBean = new CsvToBeanBuilder<User>(reader)
+			CsvToBean<User> csvToBean = new CsvToBeanBuilder<User>(streamReader)
 					.withType(User.class)
 					.withIgnoreLeadingWhiteSpace(true)
 					.build();
@@ -53,6 +53,21 @@ public class UserService {
 			}
 			throw e;
 		}
+	}
+	
+	private InputStream removeCommentedLines(MultipartFile file) throws IOException {
+		BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+		ByteArrayOutputStream updatedStream = new ByteArrayOutputStream();
+		BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(updatedStream));
+		String line;
+		while ((line = fileReader.readLine()) != null) {
+			if (!line.startsWith("#") && !line.isEmpty()) {
+				bufferedWriter.write(line);
+				bufferedWriter.newLine();
+			}
+		}
+		bufferedWriter.flush();
+		return new ByteArrayInputStream(updatedStream.toByteArray());
 	}
 	
 	private boolean isMissingField(Exception e) {

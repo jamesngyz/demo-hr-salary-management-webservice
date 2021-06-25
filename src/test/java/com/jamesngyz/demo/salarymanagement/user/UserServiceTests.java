@@ -182,4 +182,35 @@ public class UserServiceTests {
 				.hasMessage(InvalidCsvException.invalidFieldValue().getMessage());
 	}
 	
+	@Test
+	void csvToUsers_RowStartsWithHex_IgnoreRow() throws IOException, ParseException {
+		MockMultipartFile file = new MockMultipartFile(
+				"file", "test.txt", "text/plain",
+				("id,login,name,salary,startDate\n" +
+						"#e0001,hpotter,Harry Potter,1234.00,16-Nov-01\n" +
+						"e0002,rwesley,Ron Weasley,19234.50,2001-11-16").getBytes());
+		
+		User user1 = User.builder()
+				.id("#e0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("16-Nov-01", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DD_MMM_YY)))
+				.build();
+		User user2 = User.builder()
+				.id("e0002")
+				.login("rwesley")
+				.name("Ron Weasley")
+				.salary(BigDecimal.valueOf(19234.50))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_YYYY_MM_DD)))
+				.build();
+		
+		List<User> result = subject.csvToUsers(file);
+		
+		assertThat(result).isNotNull();
+		assertThat(result).hasSize(1);
+		assertThat(result).doesNotContain(user1);
+		assertThat(result).contains(user2);
+	}
+	
 }
