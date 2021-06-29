@@ -1,5 +1,7 @@
 package com.jamesngyz.demo.salarymanagement.user;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -26,10 +28,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jamesngyz.demo.salarymanagement.Constants;
 import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.ErrorResponse;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
+import com.jamesngyz.demo.salarymanagement.user.rest.UserRequest;
+import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 
 @WebMvcTest
 public class UserControllerTests {
@@ -176,6 +181,176 @@ public class UserControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(content().json(expected));
+	}
+	
+	@Test
+	void getUser_validId_HttpStatus200() throws Exception {
+		String id = "e0001";
+		User user = User.builder()
+				.id(id)
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("16-Nov-01", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DD_MMM_YY)))
+				.build();
+		
+		when(service.getUser(id)).thenReturn(user);
+		
+		UserResponse expectedResponse = UserDtoMapper.userToResponse(user);
+		String expected = objectMapper.writeValueAsString(expectedResponse);
+		
+		mockMvc.perform(get("/users/" + id))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json(expected));
+	}
+	
+	@Test
+	void getUser_UserNotFound_HttpStatus400() throws Exception {
+		String id = "e0001";
+		when(service.getUser(id)).thenReturn(null);
+		
+		mockMvc.perform(get("/users/" + id))
+				.andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	void createUser_ValidRequest_HttpStatus201() throws Exception {
+		String requestJson = "{\"id\": \"emp0001\", " +
+				"\"login\": \"hpotter\", " +
+				"\"name\": \"Harry Potter\", " +
+				"\"salary\": 1234.00, " +
+				"\"startDate\": \"2001-12-16\"}";
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isCreated())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Successfully created\"}"));
+	}
+	
+	@Test
+	void createUser_IdAlreadyExists_HttpStatus400() throws Exception {
+		UserRequest request = UserRequest.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		String requestJson = objectMapper.writeValueAsString(request);
+		
+		doThrow(BadRequestException.idAlreadyExists()).when(service).createUser(any());
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Employee ID already exists\"}"));
+	}
+	
+	@Test
+	void createUser_LoginNotUnique_HttpStatus400() throws Exception {
+		UserRequest request = UserRequest.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		String requestJson = objectMapper.writeValueAsString(request);
+		
+		doThrow(BadRequestException.loginNotUnique()).when(service).createUser(any());
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Employee login not unique\"}"));
+	}
+	
+	@Test
+	void createUser_NegativeSalary_HttpStatus400() throws Exception {
+		UserRequest request = UserRequest.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(-1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		String requestJson = objectMapper.writeValueAsString(request);
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Invalid salary\"}"));
+	}
+	
+	@Test
+	void createUser_InvalidDate_HttpStatus400() throws Exception {
+		String requestJson = "{\"id\": \"emp0001\", " +
+				"\"login\": \"hpotter\", " +
+				"\"name\": \"Harry Potter\", " +
+				"\"salary\": 1234.00, " +
+				"\"startDate\": \"2001-13-16\"}";
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Invalid date\"}"));
+	}
+	
+	@Test
+	void updateUser_ValidRequest_HttpStatus200() throws Exception {
+		String id = "emp0001";
+		String requestJson = "{\"login\": \"hpotter\", " +
+				"\"name\": \"Harry Potter\", " +
+				"\"salary\": 1234.00, " +
+				"\"startDate\": \"2001-12-16\"}";
+		
+		mockMvc.perform(
+				put("/users/" + id)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Successfully updated\"}"));
+	}
+	
+	@Test
+	void deleteUser_ValidId_HttpStatus200() throws Exception {
+		String id = "emp0001";
+		
+		mockMvc.perform(
+				delete("/users/" + id))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Successfully deleted\"}"));
+	}
+	
+	@Test
+	void deleteUser_UserNotFound_HttpStatus400() throws Exception {
+		String id = "emp0001";
+		
+		doThrow(BadRequestException.noSuchEmployee()).when(service).deleteUser(any());
+		
+		mockMvc.perform(
+				delete("/users/" + id))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"No such employee\"}"));
 	}
 	
 }

@@ -5,17 +5,20 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.jamesngyz.demo.salarymanagement.MessageResponse;
 import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.error.ResourceNotFoundException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
+import com.jamesngyz.demo.salarymanagement.user.rest.UserRequest;
+import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 
 @RestController
 public class UserController {
@@ -56,4 +59,41 @@ public class UserController {
 		UserAggregateResponse response = UserDtoMapper.usersToAggregateResponse(users);
 		return ResponseEntity.ok().body(response);
 	}
+	
+	@GetMapping(path = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<UserResponse> fetchUser(@PathVariable(name = "id") String id) {
+		User result = userService.getUser(id);
+		if (result == null) {
+			throw new ResourceNotFoundException("/users/" + id);
+		}
+		UserResponse response = UserDtoMapper.userToResponse(result);
+		return ResponseEntity.ok().body(response);
+	}
+	
+	@PostMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<MessageResponse> createUser(@Valid @RequestBody UserRequest request) {
+		
+		User user = UserDtoMapper.requestToUser(request);
+		userService.createUser(user);
+		return ResponseEntity
+				.created(URI.create("/users/" + request.getId()))
+				.body(new MessageResponse("Successfully created"));
+	}
+	
+	@PutMapping(path = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<MessageResponse> updateUser(@PathVariable(name = "id") String id,
+			@Valid @RequestBody UserRequest request) {
+		
+		User user = UserDtoMapper.requestToUser(request);
+		userService.updateUser(id, user);
+		return ResponseEntity.ok().body(new MessageResponse("Successfully updated"));
+	}
+	
+	@DeleteMapping(path = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<MessageResponse> deleteUser(@PathVariable(name = "id") String id) {
+		
+		userService.deleteUser(id);
+		return ResponseEntity.ok().body(new MessageResponse("Successfully deleted"));
+	}
+	
 }

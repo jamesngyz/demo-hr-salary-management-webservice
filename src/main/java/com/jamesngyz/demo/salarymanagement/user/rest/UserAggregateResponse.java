@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class UserAggregateResponse {
 	
-	@JsonProperty("users")
+	@JsonProperty("results")
 	private List<UserResponse> users = new ArrayList<>();
 	
 }

@@ -5,10 +5,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -66,6 +70,10 @@ public class UserService {
 		return userJpaRepository.findBySalaryMinInclusiveAndMaxExclusive(minSalary, maxSalary, pageable);
 	}
 	
+	User getUser(String id) {
+		return userJpaRepository.findById(id).orElse(null);
+	}
+	
 	private InputStream removeCommentedLines(MultipartFile file) throws IOException {
 		BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream()));
 		ByteArrayOutputStream updatedStream = new ByteArrayOutputStream();
@@ -92,4 +100,50 @@ public class UserService {
 						.getTargetException() instanceof InvalidCsvException;
 	}
 	
+	public void createUser(User user) {
+		try {
+			userRepository.create(user);
+		} catch (Exception e) {
+			if (e instanceof DataIntegrityViolationException) {
+				if (userJpaRepository.existsById(user.getId())) {
+					throw BadRequestException.idAlreadyExists();
+				}
+				User userWithLogin = User.builder()
+						.login(user.getLogin())
+						.build();
+				if (userJpaRepository.exists(Example.of(userWithLogin))) {
+					throw BadRequestException.loginNotUnique();
+				}
+			}
+			throw e;
+		}
+	}
+	
+	public Integer updateUser(String id, User user) {
+		try {
+			return userJpaRepository.updateUserById(id,
+					user.getLogin(),
+					user.getName(),
+					user.getSalary(),
+					user.getStartDate());
+		} catch (Exception e) {
+			if (e instanceof DataIntegrityViolationException) {
+				User userWithLogin = User.builder()
+						.login(user.getLogin())
+						.build();
+				if (userJpaRepository.exists(Example.of(userWithLogin))) {
+					throw BadRequestException.loginNotUnique();
+				}
+			}
+			throw e;
+		}
+	}
+	
+	public void deleteUser(String id) {
+		try {
+			userJpaRepository.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
+			throw BadRequestException.noSuchEmployee();
+		}
+	}
 }

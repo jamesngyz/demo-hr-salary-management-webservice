@@ -2,6 +2,7 @@ package com.jamesngyz.demo.salarymanagement.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -11,20 +12,21 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Example;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.jamesngyz.demo.salarymanagement.Constants;
 import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 
 @ExtendWith(MockitoExtension.class)
@@ -236,13 +238,114 @@ public class UserServiceTests {
 		List<User> expected = new ArrayList<>();
 		expected.add(user1);
 		expected.add(user2);
-		
 		when(jpaRepository.findBySalaryMinInclusiveAndMaxExclusive(BigDecimal.ZERO, new BigDecimal(4000),
 				new OffsetPageable())).thenReturn(expected);
 		
 		List<User> result = subject.getUsersWithSalaryBetween(BigDecimal.ZERO, new BigDecimal(4000),
 				new OffsetPageable());
+		
 		assertThat(result).isEqualTo(expected);
+	}
+	
+	@Test
+	void getUser_ValidId_ReturnUser() {
+		String id = "e0001";
+		User expected = User.builder()
+				.id(id)
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("16-Nov-01", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DD_MMM_YY)))
+				.build();
+		when(jpaRepository.findById(id)).thenReturn(Optional.ofNullable(expected));
+		
+		User result = subject.getUser(id);
+		
+		assertThat(result).isNotNull();
+		assertThat(result).isEqualTo(expected);
+	}
+	
+	@Test
+	void getUser_UserNotFound_ReturnNull() {
+		String id = "e0001";
+		when(jpaRepository.findById(id)).thenReturn(Optional.empty());
+		
+		User result = subject.getUser(id);
+		
+		assertThat(result).isNull();
+	}
+	
+	@Test
+	void createUser_ValidUser_ReturnUser() {
+		User user = User.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		
+		subject.createUser(user);
+	}
+	
+	@Test
+	void createUser_IdAlreadyExists_ThrowException() {
+		User user = User.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		
+		doThrow(new DataIntegrityViolationException("")).when(repository).create(user);
+		when(jpaRepository.existsById(user.getId())).thenReturn(true);
+		
+		assertThatThrownBy(() -> {
+			subject.createUser(user);
+		}).isInstanceOf(BadRequestException.class)
+				.hasMessage("Employee ID already exists");
+	}
+	
+	@Test
+	void createUser_LoginNotUnique_ThrowException() {
+		User user = User.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		
+		User userWithLogin = User.builder()
+				.login(user.getLogin())
+				.build();
+		
+		doThrow(new DataIntegrityViolationException("")).when(repository).create(user);
+		when(jpaRepository.exists(Example.of(userWithLogin))).thenReturn(true);
+		
+		assertThatThrownBy(() -> {
+			subject.createUser(user);
+		}).isInstanceOf(BadRequestException.class)
+				.hasMessage("Employee login not unique");
+	}
+	
+	@Test
+	void deleteUser_ValidId_NoException() {
+		String id = "emp0001";
+		subject.deleteUser(id);
+	}
+	
+	@Test
+	void deleteUser_UserNotFound_ThrowException() {
+		String id = "emp0001";
+		
+		doThrow(new EmptyResultDataAccessException(1)).when(jpaRepository).deleteById(id);
+		
+		assertThatThrownBy(() -> {
+			subject.deleteUser(id);
+		}).isInstanceOf(BadRequestException.class)
+				.hasMessage("No such employee");
 	}
 	
 }
