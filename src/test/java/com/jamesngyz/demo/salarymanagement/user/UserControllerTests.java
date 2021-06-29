@@ -38,8 +38,8 @@ import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 @WebMvcTest
 public class UserControllerTests {
 	
-	private MockMvc mockMvc;
-	private ObjectMapper objectMapper;
+	private final MockMvc mockMvc;
+	private final ObjectMapper objectMapper;
 	
 	@MockBean
 	private UserService service;
@@ -198,7 +198,9 @@ public class UserControllerTests {
 		when(service.getUser(id)).thenReturn(null);
 		
 		mockMvc.perform(get("/users/" + id))
-				.andExpect(status().isBadRequest());
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"No such employee\"}"));
 	}
 	
 	@Test

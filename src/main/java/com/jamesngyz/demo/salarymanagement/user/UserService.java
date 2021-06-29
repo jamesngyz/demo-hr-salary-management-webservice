@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jamesngyz.demo.salarymanagement.user.data.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Example;
@@ -16,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.jamesngyz.demo.salarymanagement.common.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
+import com.jamesngyz.demo.salarymanagement.user.data.UserRepository;
 import com.jamesngyz.demo.salarymanagement.user.dto.UserCsvRow;
 import com.jamesngyz.demo.salarymanagement.user.dto.UserDtoMapper;
 import com.opencsv.bean.CsvToBean;
@@ -33,8 +33,6 @@ public class UserService {
 	}
 	
 	/**
-	 *
-	 * @param users
 	 * @return Number of users created/updated. Returns 0 (zero) if all requested
 	 *         users already exist and there is no change to field values
 	 */

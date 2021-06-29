@@ -2,7 +2,6 @@ package com.jamesngyz.demo.salarymanagement.error;
 
 import java.time.LocalDate;
 
-import com.jamesngyz.demo.salarymanagement.common.MessageResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,13 +17,12 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.jamesngyz.demo.salarymanagement.common.MessageResponse;
 
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	
-	@ExceptionHandler({ InvalidCsvException.class,
-			ResourceNotFoundException.class,
-			BadRequestException.class })
+	@ExceptionHandler({ InvalidCsvException.class, BadRequestException.class })
 	protected ResponseEntity<Object> handleBadRequest(Exception ex) {
 		
 		return ResponseEntity.badRequest()

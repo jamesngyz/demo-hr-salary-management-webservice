@@ -8,7 +8,7 @@ import com.opencsv.bean.AbstractBeanField;
 import com.opencsv.exceptions.CsvConstraintViolationException;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 
-public class CsvDateConverter extends AbstractBeanField {
+public class CsvDateConverter<T, I> extends AbstractBeanField<T, I> {
 	@Override
 	protected Object convert(String s) throws CsvDataTypeMismatchException, CsvConstraintViolationException {
 		try {
