@@ -99,7 +99,7 @@ public class UserService {
 						.getTargetException() instanceof InvalidCsvException;
 	}
 	
-	public User createUser(User user) {
+	public void createUser(User user) {
 		try {
 			userRepository.create(user);
 		} catch (Exception e) {
@@ -116,7 +116,6 @@ public class UserService {
 			}
 			throw e;
 		}
-		return user;
 	}
 	
 	public Integer updateUser(String id, User user) {

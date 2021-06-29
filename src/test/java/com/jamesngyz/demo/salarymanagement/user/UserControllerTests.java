@@ -1,6 +1,7 @@
 package com.jamesngyz.demo.salarymanagement.user;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -215,20 +216,11 @@ public class UserControllerTests {
 	
 	@Test
 	void createUser_ValidRequest_HttpStatus201() throws Exception {
-		UserRequest request = UserRequest.builder()
-				.id("emp0001")
-				.login("hpotter")
-				.name("Harry Potter")
-				.salary(BigDecimal.valueOf(1234.00))
-				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
-				.build();
-		String requestJson = objectMapper.writeValueAsString(request);
-		User user = UserDtoMapper.requestToUser(request);
-		
-		when(service.createUser(user)).thenReturn(user);
-		
-		UserResponse expectedResponse = UserDtoMapper.userToResponse(user);
-		String expected = objectMapper.writeValueAsString(expectedResponse);
+		String requestJson = "{\"id\": \"emp0001\", " +
+				"\"login\": \"hpotter\", " +
+				"\"name\": \"Harry Potter\", " +
+				"\"salary\": 1234.00, " +
+				"\"startDate\": \"2001-12-16\"}";
 		
 		mockMvc.perform(
 				post("/users")
@@ -236,7 +228,7 @@ public class UserControllerTests {
 						.content(requestJson))
 				.andExpect(status().isCreated())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(content().json(expected));
+				.andExpect(content().json("{\"message\": \"Successfully created\"}"));
 	}
 	
 	@Test
@@ -250,7 +242,7 @@ public class UserControllerTests {
 				.build();
 		String requestJson = objectMapper.writeValueAsString(request);
 		
-		when(service.createUser(any())).thenThrow(BadRequestException.idAlreadyExists());
+		doThrow(BadRequestException.idAlreadyExists()).when(service).createUser(any());
 		
 		mockMvc.perform(
 				post("/users")
@@ -272,7 +264,7 @@ public class UserControllerTests {
 				.build();
 		String requestJson = objectMapper.writeValueAsString(request);
 		
-		when(service.createUser(any())).thenThrow(BadRequestException.loginNotUnique());
+		doThrow(BadRequestException.loginNotUnique()).when(service).createUser(any());
 		
 		mockMvc.perform(
 				post("/users")

@@ -284,10 +284,7 @@ public class UserServiceTests {
 				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
 				.build();
 		
-		User result = subject.createUser(user);
-		
-		assertThat(result).isNotNull();
-		assertThat(result).isEqualTo(user);
+		subject.createUser(user);
 	}
 	
 	@Test

@@ -71,13 +71,15 @@ public class UserController {
 	}
 	
 	@PostMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
+	ResponseEntity<MessageResponse> createUser(@Valid @RequestBody UserRequest request) {
 		User user = UserDtoMapper.requestToUser(request);
 		
-		User result = userService.createUser(user);
+		userService.createUser(user);
 		
-		UserResponse response = UserDtoMapper.userToResponse(result);
-		return ResponseEntity.created(URI.create("/users/" + result.getId())).body(response);
+		UserResponse response = UserDtoMapper.userToResponse(user);
+		return ResponseEntity
+				.created(URI.create("/users/" + request.getId()))
+				.body(new MessageResponse("Successfully created"));
 	}
 	
 	@PutMapping(path = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
