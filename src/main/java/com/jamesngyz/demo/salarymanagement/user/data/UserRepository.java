@@ -1,9 +1,10 @@
-package com.jamesngyz.demo.salarymanagement.user;
+package com.jamesngyz.demo.salarymanagement.user.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.jamesngyz.demo.salarymanagement.user.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

@@ -1,4 +1,4 @@
-package com.jamesngyz.demo.salarymanagement.user;
+package com.jamesngyz.demo.salarymanagement.user.data;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import com.jamesngyz.demo.salarymanagement.user.User;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;

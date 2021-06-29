@@ -1,4 +1,6 @@
-package com.jamesngyz.demo.salarymanagement.user;
+package com.jamesngyz.demo.salarymanagement.user.data;
+
+import com.jamesngyz.demo.salarymanagement.user.User;
 
 import java.util.List;
 
