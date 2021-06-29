@@ -30,6 +30,7 @@ import com.jamesngyz.demo.salarymanagement.common.Constants;
 import com.jamesngyz.demo.salarymanagement.common.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
+import com.jamesngyz.demo.salarymanagement.user.dto.UserDtoMapper;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserRequest;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;

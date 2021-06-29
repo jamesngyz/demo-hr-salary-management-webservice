@@ -1,4 +1,4 @@
-package com.jamesngyz.demo.salarymanagement.user;
+package com.jamesngyz.demo.salarymanagement.user.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

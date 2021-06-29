@@ -1,7 +1,8 @@
-package com.jamesngyz.demo.salarymanagement.user;
+package com.jamesngyz.demo.salarymanagement.user.dto;
 
 import java.util.List;
 
+import com.jamesngyz.demo.salarymanagement.user.User;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserRequest;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;

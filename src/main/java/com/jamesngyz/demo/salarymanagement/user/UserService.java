@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.jamesngyz.demo.salarymanagement.common.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
+import com.jamesngyz.demo.salarymanagement.user.dto.UserCsvRow;
+import com.jamesngyz.demo.salarymanagement.user.dto.UserDtoMapper;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.exceptions.CsvBeanIntrospectionException;
