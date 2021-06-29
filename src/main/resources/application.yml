@@ -1,8 +1,10 @@
-spring.datasource:
-  url: jdbc:h2:mem:salarydb;DB_CLOSE_DELAY=-1;mode=MySQL
-  driver-class-name: org.h2.Driver
-  username: sa
-  password: password
+spring:
+  datasource:
+    url: jdbc:h2:mem:salarydb;DB_CLOSE_DELAY=-1;mode=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  jpa.hibernate.ddl-auto: none
 spring.h2.console.enabled: true
 
 hibernate:

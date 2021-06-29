@@ -1,5 +1,6 @@
 package com.jamesngyz.demo.salarymanagement.user;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -26,10 +27,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jamesngyz.demo.salarymanagement.Constants;
 import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.ErrorResponse;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
+import com.jamesngyz.demo.salarymanagement.user.rest.UserRequest;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 
 @WebMvcTest
@@ -208,6 +211,113 @@ public class UserControllerTests {
 		
 		mockMvc.perform(get("/users/" + id))
 				.andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	void createUser_ValidRequest_HttpStatus201() throws Exception {
+		UserRequest request = UserRequest.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		String requestJson = objectMapper.writeValueAsString(request);
+		User user = UserDtoMapper.requestToUser(request);
+		
+		when(service.createUser(user)).thenReturn(user);
+		
+		UserResponse expectedResponse = UserDtoMapper.userToResponse(user);
+		String expected = objectMapper.writeValueAsString(expectedResponse);
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isCreated())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json(expected));
+	}
+	
+	@Test
+	void createUser_IdAlreadyExists_HttpStatus400() throws Exception {
+		UserRequest request = UserRequest.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		String requestJson = objectMapper.writeValueAsString(request);
+		
+		when(service.createUser(any())).thenThrow(BadRequestException.idAlreadyExists());
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Employee ID already exists\"}"));
+	}
+	
+	@Test
+	void createUser_LoginNotUnique_HttpStatus400() throws Exception {
+		UserRequest request = UserRequest.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		String requestJson = objectMapper.writeValueAsString(request);
+		
+		when(service.createUser(any())).thenThrow(BadRequestException.loginNotUnique());
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Employee login not unique\"}"));
+	}
+	
+	@Test
+	void createUser_NegativeSalary_HttpStatus400() throws Exception {
+		UserRequest request = UserRequest.builder()
+				.id("emp0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(-1234.00))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ISO_DATE))
+				.build();
+		String requestJson = objectMapper.writeValueAsString(request);
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Invalid salary\"}"));
+	}
+	
+	@Test
+	void createUser_InvalidDate_HttpStatus400() throws Exception {
+		String requestJson = "{\"id\": \"emp0001\", " +
+				"\"login\": \"hpotter\", " +
+				"\"name\": \"Harry Potter\", " +
+				"\"salary\": 1234.00, " +
+				"\"startDate\": \"2001-13-16\"}";
+		
+		mockMvc.perform(
+				post("/users")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Invalid date\"}"));
 	}
 	
 }

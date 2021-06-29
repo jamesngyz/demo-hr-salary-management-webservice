@@ -5,10 +5,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -94,6 +97,26 @@ public class UserService {
 				e.getCause().getCause() != null && e.getCause().getCause() instanceof InvocationTargetException &&
 				((InvocationTargetException) e.getCause().getCause())
 						.getTargetException() instanceof InvalidCsvException;
+	}
+	
+	public User createUser(User user) {
+		try {
+			userRepository.create(user);
+		} catch (Exception e) {
+			if (e instanceof DataIntegrityViolationException) {
+				if (userJpaRepository.existsById(user.getId())) {
+					throw BadRequestException.idAlreadyExists();
+				}
+				User userWithLogin = User.builder()
+						.login(user.getLogin())
+						.build();
+				if (userJpaRepository.exists(Example.of(userWithLogin))) {
+					throw BadRequestException.loginNotUnique();
+				}
+			}
+			throw e;
+		}
+		return user;
 	}
 	
 }

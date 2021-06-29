@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import com.jamesngyz.demo.salarymanagement.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.ResourceNotFoundException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
+import com.jamesngyz.demo.salarymanagement.user.rest.UserRequest;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 
 @RestController
@@ -66,4 +69,13 @@ public class UserController {
 		return ResponseEntity.ok().body(response);
 	}
 	
+	@PostMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
+		User user = UserDtoMapper.requestToUser(request);
+		
+		User result = userService.createUser(user);
+		
+		UserResponse response = UserDtoMapper.userToResponse(result);
+		return ResponseEntity.created(URI.create("/users/" + result.getId())).body(response);
+	}
 }
