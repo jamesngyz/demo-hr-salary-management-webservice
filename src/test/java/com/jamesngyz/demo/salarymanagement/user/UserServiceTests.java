@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.jamesngyz.demo.salarymanagement.Constants;
+import com.jamesngyz.demo.salarymanagement.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +35,9 @@ public class UserServiceTests {
 	
 	@Mock
 	private UserRepository repository;
+	
+	@Mock
+	private UserJpaRepository jpaRepository;
 	
 	@Test
 	void createOrUpdateUsers_Created_ReturnCount() throws ParseException {
@@ -211,6 +215,34 @@ public class UserServiceTests {
 		assertThat(result).hasSize(1);
 		assertThat(result).doesNotContain(user1);
 		assertThat(result).contains(user2);
+	}
+	
+	@Test
+	void getUsersWithMinSalaryAndMaxSalary_ValidRequest_ReturnUsers() {
+		User user1 = User.builder()
+				.id("e0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("16-Nov-01", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DD_MMM_YY)))
+				.build();
+		User user2 = User.builder()
+				.id("e0002")
+				.login("rwesley")
+				.name("Ron Weasley")
+				.salary(BigDecimal.valueOf(1234.50))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_YYYY_MM_DD)))
+				.build();
+		List<User> expected = new ArrayList<>();
+		expected.add(user1);
+		expected.add(user2);
+		
+		when(jpaRepository.findBySalaryMinInclusiveAndMaxExclusive(BigDecimal.ZERO, new BigDecimal(4000),
+				new OffsetPageable())).thenReturn(expected);
+		
+		List<User> result = subject.getUsersWithSalaryBetween(BigDecimal.ZERO, new BigDecimal(4000),
+				new OffsetPageable());
+		assertThat(result).isEqualTo(expected);
 	}
 	
 }
