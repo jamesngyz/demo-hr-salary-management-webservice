@@ -38,9 +38,6 @@ public class UserServiceTests {
 	@Mock
 	private UserRepository repository;
 	
-	@Mock
-	private UserJpaRepository jpaRepository;
-	
 	@Test
 	void createOrUpdateUsers_Created_ReturnCount() throws ParseException {
 		List<User> requested = new ArrayList<>();
@@ -238,7 +235,7 @@ public class UserServiceTests {
 		List<User> expected = new ArrayList<>();
 		expected.add(user1);
 		expected.add(user2);
-		when(jpaRepository.findBySalaryMinInclusiveAndMaxExclusive(BigDecimal.ZERO, new BigDecimal(4000),
+		when(repository.findBySalaryMinInclusiveAndMaxExclusive(BigDecimal.ZERO, new BigDecimal(4000),
 				new OffsetPageable())).thenReturn(expected);
 		
 		List<User> result = subject.getUsersWithSalaryBetween(BigDecimal.ZERO, new BigDecimal(4000),
@@ -257,7 +254,7 @@ public class UserServiceTests {
 				.salary(BigDecimal.valueOf(1234.00))
 				.startDate(LocalDate.parse("16-Nov-01", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DD_MMM_YY)))
 				.build();
-		when(jpaRepository.findById(id)).thenReturn(Optional.ofNullable(expected));
+		when(repository.findById(id)).thenReturn(Optional.ofNullable(expected));
 		
 		User result = subject.getUser(id);
 		
@@ -268,7 +265,7 @@ public class UserServiceTests {
 	@Test
 	void getUser_UserNotFound_ReturnNull() {
 		String id = "e0001";
-		when(jpaRepository.findById(id)).thenReturn(Optional.empty());
+		when(repository.findById(id)).thenReturn(Optional.empty());
 		
 		User result = subject.getUser(id);
 		
@@ -299,7 +296,7 @@ public class UserServiceTests {
 				.build();
 		
 		doThrow(new DataIntegrityViolationException("")).when(repository).create(user);
-		when(jpaRepository.existsById(user.getId())).thenReturn(true);
+		when(repository.existsById(user.getId())).thenReturn(true);
 		
 		assertThatThrownBy(() -> {
 			subject.createUser(user);
@@ -322,7 +319,7 @@ public class UserServiceTests {
 				.build();
 		
 		doThrow(new DataIntegrityViolationException("")).when(repository).create(user);
-		when(jpaRepository.exists(Example.of(userWithLogin))).thenReturn(true);
+		when(repository.exists(Example.of(userWithLogin))).thenReturn(true);
 		
 		assertThatThrownBy(() -> {
 			subject.createUser(user);
@@ -340,7 +337,7 @@ public class UserServiceTests {
 	void deleteUser_UserNotFound_ThrowException() {
 		String id = "emp0001";
 		
-		doThrow(new EmptyResultDataAccessException(1)).when(jpaRepository).deleteById(id);
+		doThrow(new EmptyResultDataAccessException(1)).when(repository).deleteById(id);
 		
 		assertThatThrownBy(() -> {
 			subject.deleteUser(id);

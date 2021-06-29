@@ -25,12 +25,10 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 @Service
 public class UserService {
 	
-	private UserRepository userRepository;
-	private UserJpaRepository userJpaRepository;
+	private final UserRepository userRepository;
 	
-	public UserService(UserRepository userRepository, UserJpaRepository userJpaRepository) {
+	public UserService(UserRepository userRepository) {
 		this.userRepository = userRepository;
-		this.userJpaRepository = userJpaRepository;
 	}
 	
 	/**
@@ -74,11 +72,11 @@ public class UserService {
 			BigDecimal maxSalary,
 			OffsetPageable pageable) {
 		
-		return userJpaRepository.findBySalaryMinInclusiveAndMaxExclusive(minSalary, maxSalary, pageable);
+		return userRepository.findBySalaryMinInclusiveAndMaxExclusive(minSalary, maxSalary, pageable);
 	}
 	
 	User getUser(String id) {
-		return userJpaRepository.findById(id).orElse(null);
+		return userRepository.findById(id).orElse(null);
 	}
 	
 	private InputStream removeCommentedLines(MultipartFile file) throws IOException {
@@ -112,13 +110,13 @@ public class UserService {
 			userRepository.create(user);
 		} catch (Exception e) {
 			if (e instanceof DataIntegrityViolationException) {
-				if (userJpaRepository.existsById(user.getId())) {
+				if (userRepository.existsById(user.getId())) {
 					throw BadRequestException.idAlreadyExists();
 				}
 				User userWithLogin = User.builder()
 						.login(user.getLogin())
 						.build();
-				if (userJpaRepository.exists(Example.of(userWithLogin))) {
+				if (userRepository.exists(Example.of(userWithLogin))) {
 					throw BadRequestException.loginNotUnique();
 				}
 			}
@@ -128,7 +126,7 @@ public class UserService {
 	
 	public Integer updateUser(String id, User user) {
 		try {
-			return userJpaRepository.updateUserById(id,
+			return userRepository.updateUserById(id,
 					user.getLogin(),
 					user.getName(),
 					user.getSalary(),
@@ -138,7 +136,7 @@ public class UserService {
 				User userWithLogin = User.builder()
 						.login(user.getLogin())
 						.build();
-				if (userJpaRepository.exists(Example.of(userWithLogin))) {
+				if (userRepository.exists(Example.of(userWithLogin))) {
 					throw BadRequestException.loginNotUnique();
 				}
 			}
@@ -148,7 +146,7 @@ public class UserService {
 	
 	public void deleteUser(String id) {
 		try {
-			userJpaRepository.deleteById(id);
+			userRepository.deleteById(id);
 		} catch (EmptyResultDataAccessException e) {
 			throw BadRequestException.noSuchEmployee();
 		}
