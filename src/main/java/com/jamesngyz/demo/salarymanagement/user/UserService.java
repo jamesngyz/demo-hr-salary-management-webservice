@@ -119,4 +119,24 @@ public class UserService {
 		return user;
 	}
 	
+	public Integer updateUser(String id, User user) {
+		try {
+			return userJpaRepository.updateUserById(id,
+					user.getLogin(),
+					user.getName(),
+					user.getSalary(),
+					user.getStartDate());
+		} catch (Exception e) {
+			if (e instanceof DataIntegrityViolationException) {
+				User userWithLogin = User.builder()
+						.login(user.getLogin())
+						.build();
+				if (userJpaRepository.exists(Example.of(userWithLogin))) {
+					throw BadRequestException.loginNotUnique();
+				}
+			}
+			throw e;
+		}
+	}
+	
 }

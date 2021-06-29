@@ -320,4 +320,21 @@ public class UserControllerTests {
 				.andExpect(content().json("{\"message\": \"Invalid date\"}"));
 	}
 	
+	@Test
+	void updateUser_ValidRequest_HttpStatus200() throws Exception {
+		String id = "emp0001";
+		String requestJson = "{\"login\": \"hpotter\", " +
+				"\"name\": \"Harry Potter\", " +
+				"\"salary\": 1234.00, " +
+				"\"startDate\": \"2001-12-16\"}";
+		
+		mockMvc.perform(
+				put("/users/" + id)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestJson))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Successfully updated\"}"));
+	}
+	
 }

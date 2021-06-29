@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.jamesngyz.demo.salarymanagement.MessageResponse;
 import com.jamesngyz.demo.salarymanagement.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.ResourceNotFoundException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
@@ -78,4 +79,15 @@ public class UserController {
 		UserResponse response = UserDtoMapper.userToResponse(result);
 		return ResponseEntity.created(URI.create("/users/" + result.getId())).body(response);
 	}
+	
+	@PutMapping(path = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<MessageResponse> updateUser(@PathVariable(name = "id") String id,
+			@Valid @RequestBody UserRequest request) {
+		User user = UserDtoMapper.requestToUser(request);
+		
+		userService.updateUser(id, user);
+		
+		return ResponseEntity.ok().body(new MessageResponse("Successfully updated"));
+	}
+	
 }
