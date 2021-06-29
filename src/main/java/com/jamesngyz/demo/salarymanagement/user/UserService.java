@@ -66,6 +66,10 @@ public class UserService {
 		return userJpaRepository.findBySalaryMinInclusiveAndMaxExclusive(minSalary, maxSalary, pageable);
 	}
 	
+	User getUser(String id) {
+		return userJpaRepository.findById(id).orElse(null);
+	}
+	
 	private InputStream removeCommentedLines(MultipartFile file) throws IOException {
 		BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream()));
 		ByteArrayOutputStream updatedStream = new ByteArrayOutputStream();

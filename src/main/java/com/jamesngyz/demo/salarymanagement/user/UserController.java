@@ -7,15 +7,14 @@ import java.util.List;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.error.ResourceNotFoundException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
+import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 
 @RestController
 public class UserController {
@@ -56,4 +55,15 @@ public class UserController {
 		UserAggregateResponse response = UserDtoMapper.usersToAggregateResponse(users);
 		return ResponseEntity.ok().body(response);
 	}
+	
+	@GetMapping(path = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<UserResponse> fetchUser(@PathVariable(name = "id") String id) {
+		User result = userService.getUser(id);
+		if (result == null) {
+			throw new ResourceNotFoundException("/users/" + id);
+		}
+		UserResponse response = UserDtoMapper.userToResponse(result);
+		return ResponseEntity.ok().body(response);
+	}
+	
 }

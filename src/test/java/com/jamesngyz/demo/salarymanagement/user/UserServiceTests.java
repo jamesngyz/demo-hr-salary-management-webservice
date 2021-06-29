@@ -11,10 +11,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -236,13 +233,41 @@ public class UserServiceTests {
 		List<User> expected = new ArrayList<>();
 		expected.add(user1);
 		expected.add(user2);
-		
 		when(jpaRepository.findBySalaryMinInclusiveAndMaxExclusive(BigDecimal.ZERO, new BigDecimal(4000),
 				new OffsetPageable())).thenReturn(expected);
 		
 		List<User> result = subject.getUsersWithSalaryBetween(BigDecimal.ZERO, new BigDecimal(4000),
 				new OffsetPageable());
+		
 		assertThat(result).isEqualTo(expected);
+	}
+	
+	@Test
+	void getUser_ValidId_ReturnUser() {
+		String id = "e0001";
+		User expected = User.builder()
+				.id(id)
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("16-Nov-01", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DD_MMM_YY)))
+				.build();
+		when(jpaRepository.findById(id)).thenReturn(Optional.ofNullable(expected));
+		
+		User result = subject.getUser(id);
+		
+		assertThat(result).isNotNull();
+		assertThat(result).isEqualTo(expected);
+	}
+	
+	@Test
+	void getUser_UserNotFound_ReturnNull() {
+		String id = "e0001";
+		when(jpaRepository.findById(id)).thenReturn(Optional.empty());
+		
+		User result = subject.getUser(id);
+		
+		assertThat(result).isNull();
 	}
 	
 }

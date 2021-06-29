@@ -30,6 +30,7 @@ import com.jamesngyz.demo.salarymanagement.error.ErrorResponse;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
+import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 
 @WebMvcTest
 public class UserControllerTests {
@@ -176,6 +177,37 @@ public class UserControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(content().json(expected));
+	}
+	
+	@Test
+	void getUser_validId_HttpStatus200() throws Exception {
+		String id = "e0001";
+		User user = User.builder()
+				.id(id)
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("16-Nov-01", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DD_MMM_YY)))
+				.build();
+		
+		when(service.getUser(id)).thenReturn(user);
+		
+		UserResponse expectedResponse = UserDtoMapper.userToResponse(user);
+		String expected = objectMapper.writeValueAsString(expectedResponse);
+		
+		mockMvc.perform(get("/users/" + id))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json(expected));
+	}
+	
+	@Test
+	void getUser_UserNotFound_HttpStatus400() throws Exception {
+		String id = "e0001";
+		when(service.getUser(id)).thenReturn(null);
+		
+		mockMvc.perform(get("/users/" + id))
+				.andExpect(status().isBadRequest());
 	}
 	
 }

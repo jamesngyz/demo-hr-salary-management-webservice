@@ -21,6 +21,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 				.body(new ErrorResponse(ex.getMessage()));
 	}
 	
+	@ExceptionHandler({ ResourceNotFoundException.class })
+	protected ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex) {
+		
+		return ResponseEntity.badRequest()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(new ErrorResponse(ex.getMessage()));
+	}
+	
 	@Override
 	protected ResponseEntity<Object> handleMissingServletRequestPart(
 			MissingServletRequestPartException ex,
