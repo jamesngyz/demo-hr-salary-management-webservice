@@ -10,12 +10,17 @@ import com.opencsv.bean.CsvCustomBindByName;
 
 import lombok.*;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity(name="employee")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
 public class User {
-	
+
+	@Id
 	@CsvBindByName(column = "id", required = true)
 	private String id;
 	

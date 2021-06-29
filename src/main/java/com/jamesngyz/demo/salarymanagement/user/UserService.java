@@ -2,11 +2,13 @@ package com.jamesngyz.demo.salarymanagement.user;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.jamesngyz.demo.salarymanagement.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -17,9 +19,11 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 public class UserService {
 	
 	private UserRepository userRepository;
+	private UserJpaRepository userJpaRepository;
 	
-	public UserService(UserRepository userRepository) {
+	public UserService(UserRepository userRepository, UserJpaRepository userJpaRepository) {
 		this.userRepository = userRepository;
+		this.userJpaRepository = userJpaRepository;
 	}
 	
 	/**
@@ -53,6 +57,13 @@ public class UserService {
 			}
 			throw e;
 		}
+	}
+	
+	List<User> getUsersWithSalaryBetween(BigDecimal minSalary,
+			BigDecimal maxSalary,
+			OffsetPageable pageable) {
+		
+		return userJpaRepository.findBySalaryMinInclusiveAndMaxExclusive(minSalary, maxSalary, pageable);
 	}
 	
 	private InputStream removeCommentedLines(MultipartFile file) throws IOException {

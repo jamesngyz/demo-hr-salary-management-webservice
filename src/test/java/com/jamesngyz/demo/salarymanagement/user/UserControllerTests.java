@@ -1,14 +1,15 @@
 package com.jamesngyz.demo.salarymanagement.user;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,8 +25,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jamesngyz.demo.salarymanagement.Constants;
+import com.jamesngyz.demo.salarymanagement.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.ErrorResponse;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
+import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
 
 @WebMvcTest
@@ -143,4 +146,36 @@ public class UserControllerTests {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(content().json(expected));
 	}
+	
+	@Test
+	void fetchUsers_NoParameters_HttpStatus200AndReturnAllUsers() throws Exception {
+		User user1 = User.builder()
+				.id("e0001")
+				.login("hpotter")
+				.name("Harry Potter")
+				.salary(BigDecimal.valueOf(1234.00))
+				.startDate(LocalDate.parse("16-Nov-01", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DD_MMM_YY)))
+				.build();
+		User user2 = User.builder()
+				.id("e0002")
+				.login("rwesley")
+				.name("Ron Weasley")
+				.salary(BigDecimal.valueOf(1234.50))
+				.startDate(LocalDate.parse("2001-11-16", DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_YYYY_MM_DD)))
+				.build();
+		List<User> users = new ArrayList<>();
+		users.add(user1);
+		users.add(user2);
+		
+		when(service.getUsersWithSalaryBetween(BigDecimal.ZERO, new BigDecimal(4000), new OffsetPageable()))
+				.thenReturn(users);
+		UserAggregateResponse expectedResponse = UserDtoMapper.usersToAggregateResponse(users);
+		String expected = objectMapper.writeValueAsString(expectedResponse);
+		
+		mockMvc.perform(get("/users"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json(expected));
+	}
+	
 }

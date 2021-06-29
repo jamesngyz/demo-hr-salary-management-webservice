@@ -11,13 +11,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserRepository {
 	
-	private NamedParameterJdbcTemplate jdbcTemplate;
+	private final NamedParameterJdbcTemplate jdbcTemplate;
 	
 	public UserRepository(NamedParameterJdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 	
-	Integer createOrUpdate(List<User> request) {
+	public Integer createOrUpdate(List<User> request) {
 		String query = "INSERT INTO employee (id, login, name, salary, start_date) VALUES \n";
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		StringJoiner rowsJoiner = new StringJoiner(",\n");
