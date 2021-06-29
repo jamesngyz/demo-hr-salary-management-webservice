@@ -27,7 +27,7 @@ public class UserResponse {
 	private BigDecimal salary;
 	
 	@JsonProperty("startDate")
-	@JsonFormat(pattern = Constants.DATE_FORMAT_DD_MMM_YY)
+	@JsonFormat(pattern = Constants.DATE_FORMAT_YYYY_MM_DD)
 	private LocalDate startDate;
 	
 }
