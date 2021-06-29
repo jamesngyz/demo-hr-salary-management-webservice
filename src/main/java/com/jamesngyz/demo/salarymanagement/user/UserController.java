@@ -72,11 +72,9 @@ public class UserController {
 	
 	@PostMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<MessageResponse> createUser(@Valid @RequestBody UserRequest request) {
+		
 		User user = UserDtoMapper.requestToUser(request);
-		
 		userService.createUser(user);
-		
-		UserResponse response = UserDtoMapper.userToResponse(user);
 		return ResponseEntity
 				.created(URI.create("/users/" + request.getId()))
 				.body(new MessageResponse("Successfully created"));
@@ -85,11 +83,17 @@ public class UserController {
 	@PutMapping(path = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<MessageResponse> updateUser(@PathVariable(name = "id") String id,
 			@Valid @RequestBody UserRequest request) {
+		
 		User user = UserDtoMapper.requestToUser(request);
-		
 		userService.updateUser(id, user);
-		
 		return ResponseEntity.ok().body(new MessageResponse("Successfully updated"));
+	}
+	
+	@DeleteMapping(path = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<MessageResponse> deleteUser(@PathVariable(name = "id") String id) {
+		
+		userService.deleteUser(id);
+		return ResponseEntity.ok().body(new MessageResponse("Successfully deleted"));
 	}
 	
 }

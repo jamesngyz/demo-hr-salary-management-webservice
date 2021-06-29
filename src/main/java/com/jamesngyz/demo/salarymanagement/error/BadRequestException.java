@@ -13,4 +13,8 @@ public class BadRequestException extends RuntimeException {
 	public static BadRequestException loginNotUnique() {
 		return new BadRequestException("Employee login not unique");
 	}
+	
+	public static BadRequestException noSuchEmployee() {
+		return new BadRequestException("No such employee");
+	}
 }

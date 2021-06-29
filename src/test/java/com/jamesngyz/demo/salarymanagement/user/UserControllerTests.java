@@ -329,4 +329,28 @@ public class UserControllerTests {
 				.andExpect(content().json("{\"message\": \"Successfully updated\"}"));
 	}
 	
+	@Test
+	void deleteUser_ValidId_HttpStatus200() throws Exception {
+		String id = "emp0001";
+		
+		mockMvc.perform(
+				delete("/users/" + id))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"Successfully deleted\"}"));
+	}
+	
+	@Test
+	void deleteUser_UserNotFound_HttpStatus400() throws Exception {
+		String id = "emp0001";
+		
+		doThrow(BadRequestException.noSuchEmployee()).when(service).deleteUser(any());
+		
+		mockMvc.perform(
+				delete("/users/" + id))
+				.andExpect(status().isBadRequest())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().json("{\"message\": \"No such employee\"}"));
+	}
+	
 }

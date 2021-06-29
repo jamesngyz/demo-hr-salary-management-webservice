@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -138,4 +139,11 @@ public class UserService {
 		}
 	}
 	
+	public void deleteUser(String id) {
+		try {
+			userJpaRepository.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
+			throw BadRequestException.noSuchEmployee();
+		}
+	}
 }

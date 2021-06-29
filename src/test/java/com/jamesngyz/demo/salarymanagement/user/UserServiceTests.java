@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Example;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -327,6 +328,24 @@ public class UserServiceTests {
 			subject.createUser(user);
 		}).isInstanceOf(BadRequestException.class)
 				.hasMessage("Employee login not unique");
+	}
+	
+	@Test
+	void deleteUser_ValidId_NoException() {
+		String id = "emp0001";
+		subject.deleteUser(id);
+	}
+	
+	@Test
+	void deleteUser_UserNotFound_ThrowException() {
+		String id = "emp0001";
+		
+		doThrow(new EmptyResultDataAccessException(1)).when(jpaRepository).deleteById(id);
+		
+		assertThatThrownBy(() -> {
+			subject.deleteUser(id);
+		}).isInstanceOf(BadRequestException.class)
+				.hasMessage("No such employee");
 	}
 	
 }
