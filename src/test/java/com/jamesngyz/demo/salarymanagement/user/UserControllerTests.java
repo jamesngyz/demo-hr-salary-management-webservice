@@ -31,7 +31,6 @@ import com.jamesngyz.demo.salarymanagement.common.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
-import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserRequest;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 
@@ -73,14 +72,11 @@ public class UserControllerTests {
 		when(service.csvToUsers(file)).thenReturn(users);
 		when(service.createOrUpdateUsers(users)).thenReturn(1);
 		
-		UserCreateOrUpdateResponse expectedResponse = new UserCreateOrUpdateResponse(1);
-		String expected = objectMapper.writeValueAsString(expectedResponse);
-		
 		mockMvc.perform(
 				multipart("/users/upload").file(file))
 				.andExpect(status().isCreated())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(content().json(expected));
+				.andExpect(content().json("{\"message\": \"Successfully created/updated\"}"));
 	}
 	
 	@Test
@@ -106,14 +102,11 @@ public class UserControllerTests {
 		when(service.csvToUsers(file)).thenReturn(users);
 		when(service.createOrUpdateUsers(users)).thenReturn(0);
 		
-		UserCreateOrUpdateResponse expectedResponse = new UserCreateOrUpdateResponse(0);
-		String expected = objectMapper.writeValueAsString(expectedResponse);
-		
 		mockMvc.perform(
 				multipart("/users/upload").file(file))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(content().json(expected));
+				.andExpect(content().json("{\"message\": \"Successfully created/updated\"}"));
 	}
 	
 	@Test
@@ -142,7 +135,7 @@ public class UserControllerTests {
 				multipart("/users/upload").file(file))
 				.andExpect(status().isBadRequest())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(content().json("{\"message\": \"CSV contains missing field.\"}"));
+				.andExpect(content().json("{\"message\": \"CSV contains missing field\"}"));
 	}
 	
 	@Test

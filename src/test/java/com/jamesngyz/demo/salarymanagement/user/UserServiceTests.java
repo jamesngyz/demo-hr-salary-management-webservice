@@ -185,7 +185,7 @@ public class UserServiceTests {
 		assertThatThrownBy(() -> {
 			subject.csvToUsers(file);
 		}).isInstanceOf(InvalidCsvException.class)
-				.hasMessage(InvalidCsvException.invalidFieldValue().getMessage());
+				.hasMessage("CSV contains field with invalid value");
 	}
 	
 	@Test

@@ -16,7 +16,6 @@ import com.jamesngyz.demo.salarymanagement.common.MessageResponse;
 import com.jamesngyz.demo.salarymanagement.common.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.ResourceNotFoundException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
-import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserRequest;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 
@@ -30,12 +29,12 @@ public class UserController {
 	}
 	
 	@PostMapping(path = "/users/upload", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<UserCreateOrUpdateResponse> uploadUsers(@RequestParam("file") MultipartFile file)
+	ResponseEntity<MessageResponse> uploadUsers(@RequestParam("file") MultipartFile file)
 			throws IOException {
 		
 		List<User> requested = userService.csvToUsers(file);
 		Integer createdOrUpdated = userService.createOrUpdateUsers(requested);
-		UserCreateOrUpdateResponse response = new UserCreateOrUpdateResponse(createdOrUpdated);
+		MessageResponse response = new MessageResponse("Successfully created/updated");
 		
 		if (createdOrUpdated == 0) {
 			return ResponseEntity.ok(response);
