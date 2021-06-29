@@ -26,10 +26,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jamesngyz.demo.salarymanagement.Constants;
-import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.common.Constants;
+import com.jamesngyz.demo.salarymanagement.common.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
-import com.jamesngyz.demo.salarymanagement.error.ErrorResponse;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;
@@ -119,15 +118,12 @@ public class UserControllerTests {
 	
 	@Test
 	void uploadUsers_NoFileInRequest_HttpStatus400() throws Exception {
-		ErrorResponse response = new ErrorResponse("File missing in request");
-		String expected = objectMapper.writeValueAsString(response);
-		
 		mockMvc.perform(
 				post("/users/upload")
 						.contentType(MediaType.MULTIPART_FORM_DATA))
 				.andExpect(status().isBadRequest())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(content().json(expected));
+				.andExpect(content().json("{\"message\": \"File missing in request\"}"));
 	}
 	
 	@Test
@@ -142,14 +138,11 @@ public class UserControllerTests {
 		
 		when(service.csvToUsers(file)).thenThrow(InvalidCsvException.missingField());
 		
-		ErrorResponse response = new ErrorResponse(InvalidCsvException.missingField().getMessage());
-		String expected = objectMapper.writeValueAsString(response);
-		
 		mockMvc.perform(
 				multipart("/users/upload").file(file))
 				.andExpect(status().isBadRequest())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(content().json(expected));
+				.andExpect(content().json("{\"message\": \"CSV contains missing field.\"}"));
 	}
 	
 	@Test

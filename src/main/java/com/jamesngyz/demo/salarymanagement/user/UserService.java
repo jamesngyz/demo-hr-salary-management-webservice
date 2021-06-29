@@ -11,7 +11,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.common.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.opencsv.bean.CsvToBean;

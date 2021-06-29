@@ -12,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.jamesngyz.demo.salarymanagement.MessageResponse;
-import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.common.MessageResponse;
+import com.jamesngyz.demo.salarymanagement.common.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.ResourceNotFoundException;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserAggregateResponse;
 import com.jamesngyz.demo.salarymanagement.user.rest.UserCreateOrUpdateResponse;

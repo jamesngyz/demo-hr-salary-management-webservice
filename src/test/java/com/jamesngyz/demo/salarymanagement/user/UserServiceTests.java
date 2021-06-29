@@ -24,8 +24,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Example;
 import org.springframework.mock.web.MockMultipartFile;
 
-import com.jamesngyz.demo.salarymanagement.Constants;
-import com.jamesngyz.demo.salarymanagement.OffsetPageable;
+import com.jamesngyz.demo.salarymanagement.common.Constants;
+import com.jamesngyz.demo.salarymanagement.common.OffsetPageable;
 import com.jamesngyz.demo.salarymanagement.error.BadRequestException;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 

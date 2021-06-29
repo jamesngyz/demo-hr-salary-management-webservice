@@ -1,4 +1,4 @@
-package com.jamesngyz.demo.salarymanagement;
+package com.jamesngyz.demo.salarymanagement.common;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

@@ -2,6 +2,7 @@ package com.jamesngyz.demo.salarymanagement.error;
 
 import java.time.LocalDate;
 
+import com.jamesngyz.demo.salarymanagement.common.MessageResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,7 +29,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		
 		return ResponseEntity.badRequest()
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new ErrorResponse(ex.getMessage()));
+				.body(new MessageResponse(ex.getMessage()));
 	}
 	
 	@Override
@@ -45,7 +46,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		}
 		return ResponseEntity.badRequest()
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new ErrorResponse(message));
+				.body(new MessageResponse(message));
 	}
 	
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(
@@ -61,7 +62,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		}
 		return ResponseEntity.badRequest()
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new ErrorResponse(message));
+				.body(new MessageResponse(message));
 	}
 	
 	@Override
@@ -73,7 +74,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		
 		return ResponseEntity.badRequest()
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(new ErrorResponse("File missing in request"));
+				.body(new MessageResponse("File missing in request"));
 	}
 	
 }

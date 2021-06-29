@@ -8,7 +8,7 @@ import javax.validation.constraints.PositiveOrZero;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.jamesngyz.demo.salarymanagement.Constants;
+import com.jamesngyz.demo.salarymanagement.common.Constants;
 
 import lombok.Builder;
 import lombok.Data;

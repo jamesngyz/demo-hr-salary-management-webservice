@@ -1,4 +1,4 @@
-package com.jamesngyz.demo.salarymanagement;
+package com.jamesngyz.demo.salarymanagement.common;
 
 public final class Constants {
 	

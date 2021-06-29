@@ -3,7 +3,7 @@ package com.jamesngyz.demo.salarymanagement.user;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import com.jamesngyz.demo.salarymanagement.CsvDateConverter;
+import com.jamesngyz.demo.salarymanagement.common.CsvDateConverter;
 import com.jamesngyz.demo.salarymanagement.error.InvalidCsvException;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvCustomBindByName;
