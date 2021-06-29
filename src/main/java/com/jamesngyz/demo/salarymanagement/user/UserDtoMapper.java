@@ -8,15 +8,24 @@ import com.jamesngyz.demo.salarymanagement.user.rest.UserResponse;
 
 public final class UserDtoMapper {
 	
+	public static User csvRowToUser(UserCsvRow row) {
+		return User.builder()
+				.id(row.getId())
+				.login(row.getLogin())
+				.name(row.getName())
+				.salary(row.getSalary())
+				.startDate(row.getStartDate())
+				.build();
+	}
+	
 	public static UserResponse userToResponse(User user) {
-		UserResponse response = UserResponse.builder()
+		return UserResponse.builder()
 				.id(user.getId())
 				.login(user.getLogin())
 				.name(user.getName())
 				.salary(user.getSalary())
 				.startDate(user.getStartDate())
 				.build();
-		return response;
 	}
 	
 	public static UserAggregateResponse usersToAggregateResponse(List<User> users) {

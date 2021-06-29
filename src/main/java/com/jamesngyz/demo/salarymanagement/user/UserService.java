@@ -3,6 +3,7 @@ package com.jamesngyz.demo.salarymanagement.user;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -46,11 +47,15 @@ public class UserService {
 		BufferedReader streamReader = new BufferedReader(new InputStreamReader(stream));
 		
 		try {
-			CsvToBean<User> csvToBean = new CsvToBeanBuilder<User>(streamReader)
-					.withType(User.class)
+			CsvToBean<UserCsvRow> csvToBean = new CsvToBeanBuilder<UserCsvRow>(streamReader)
+					.withType(UserCsvRow.class)
 					.withIgnoreLeadingWhiteSpace(true)
 					.build();
-			return csvToBean.parse();
+			List<UserCsvRow> rows = csvToBean.parse();
+			
+			List<User> users = new ArrayList<>();
+			rows.forEach(row -> users.add(UserDtoMapper.csvRowToUser(row)));
+			return users;
 			
 		} catch (Exception e) {
 			if (isMissingField(e)) {
