@@ -26,13 +26,16 @@ Test
 
 ## Design considerations 
 
-Package-by-feature project structure is used here
-* Instead of package-by-layer
-* Ease of navigation 
+Here are the design decisions implemented in this project, and the thought process behind them.
+
+Package-by-feature project structure
+* Using this provides several advantages over package-by-layer
+* Ease of navigation
+* Maintainability -- by having all closely related classes are in the same package, not forced to make all methods `public`, prevents cyclic dependency between packages
 * Scalability -- when the project eventually scales up, this project structure makes it much easier to refactor / break this application into separate microservices 
 
-Separate DTO classes for different purposes
-* User request-DTO, response-DTO, CSV-DTO, entity-DTO, each have their own class
+Separate DTO (data transfer object) classes for different purposes
+* User request-DTO, User response-DTO, User CSV-DTO, User entity-DTO, each have their own class
 * Instead of a single one-size-fits-all "UserDto" class
 * This allows for cleaner code and finer-grained control over field validations for each purpose, as the annotations and validation logic are not mixed together in a single class   
 
@@ -41,12 +44,12 @@ Spring JPA vs JdbcTemplate
 * For more complex queries, JdbcTemplate may be more appropriate, and allows for finer optimisation
   * e.g. We can use a single multi-row INSERT statement with JdbcTemplate, whereas JPA "simulates" this via batch inserts (multiple single-row INSERT statements)
   * Even though JPA's batch insert can be optimised, a single multi-row insert statement via JdbcTemplate is still [faster](https://stackoverflow.com/a/1793209)
-* Here, we used a combination of the two to reap the benefits of both
-* When using JdbcTemplate, make use of named queries and prepared statements to prevent SQL injection
+* In this project, a combination of the two is used to reap the benefits of both
+* When using JdbcTemplate, named queries and prepared statements are used to prevent SQL injection
 
-BigDecimal is used here for monetary values
-* Instead of `float` or `double` 
-* `float` and `double` have precision issues, and hence are unsuitable for monetary usages
+BigDecimal for monetary values
+* `float` and `double` have precision issues, making them unsuitable for monetary usages
+* `BigDecimal` does not have such issues and hence is more suitable, and is used in this project
 
 Lombok, OpenCsv
 * Well-established libraries are used to reduce boilerplate code and avoid reinventing the wheel
@@ -57,5 +60,5 @@ Lombok, OpenCsv
   * controller immediately returns HTTP 200 "upload received", and calls worker node/process to process the file asynchronously
   * provide another API endpoint to check on upload status
 * It may be important to keep an audit trail of changes made to employees' salaries
-  * separate table can be created to keep a "ledger" of the changes -- each change is always appended as a row to this Ledger table (instead of update) 
+  * separate table can be created to keep a "ledger" of the changes -- each change is always appended as a new row to this Ledger table (instead of update) 
 * Database versioning libraries (Flyway, Liquibase) can be used to increase maintainability of database schema
